@@ -8,6 +8,7 @@ bleach @ file:///tmp/build/80754af9/bleach_1600439572647/work
 brotlipy==0.7.0
 cachetools==4.1.1
 Cartopy @ file:///C:/ci/cartopy_1594325515062/work
+cdsapi==0.3.1
 certifi==2020.6.20
 cffi @ file:///C:/ci/cffi_1600699246375/work
 chardet==3.0.4
@@ -108,6 +109,7 @@ terminado==0.9.1
 testpath==0.4.4
 tf-agents==0.6.0
 tornado==6.0.4
+tqdm==4.50.2
 traitlets @ file:///tmp/build/80754af9/traitlets_1602787416690/work
 urllib3 @ file:///tmp/build/80754af9/urllib3_1597086586889/work
 wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work

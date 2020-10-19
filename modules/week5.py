@@ -14,6 +14,10 @@ from matplotlib import cm
 import matplotlib.ticker as ticker
 import pandas as pd
 from modules import w4
+import time
+
+from scipy.linalg import lstsq
+import sys
 
 # For printing headings
 from modules.misc import print_heading
@@ -520,3 +524,72 @@ def main(dependant, independant):
 	regression_results = w4.multiple_fast_regression(ds, dependant, independant)
 	plotting(regression_results, dependant, independant)
 	more_plotting(regression_results, dependant, independant)
+
+
+from sklearn.linear_model import LinearRegression
+def multiple_fast_regression(data, dependant, independant):
+	"""
+	does regression fast
+	"""
+	data = data[[dependant]+independant].copy()
+	data = data.transpose('x','y','time')
+	y = data[dependant]
+	X = data[independant]
+	if y.name == 'sic':
+		times = y.dropna(dim='time').time.values
+		data = data.sel(time=times)
+	if type(dependant) == str:
+		y = data[dependant].values
+	else: y = data[dependant].to_array()
+
+	if type(independant) == str:
+		X = data[independant].values
+	else: X = data[independant].to_array()
+
+	if len(X.shape) ==4:
+		newX = np.ones([X.shape[0]+1,*X.shape[1:]])
+	else:
+		newX = np.ones([2,*X.shape])
+	newX[:-1,:] = X
+	p = np.empty([*newX.shape[:-1]])
+
+	print(f'Finding coefficients for {independant} against {dependant}')
+	time.sleep(0.2)
+	for i,j in tqdm(list(itertools.product(range(y.shape[0]), range(y.shape[1])))):
+		if np.isnan(np.sum(newX[:,i,j,:])) or np.isnan(np.sum(y[i,j,:])):
+			p[:,i,j] = 0
+		else:
+			p[:,i,j] = lstsq(newX[:,i,j,:].transpose(), y[i,j,:])[0]
+		# reg = LinearRegression().fit(newX[:,i,j,:].transpose(), y[i,j,:])
+		# p[:,i,j] = reg.coef_
+
+
+	yhat = y.copy()
+	print('Predicting SIC')
+	time.sleep(0.2)
+	yhat = np.einsum('nijt,nij->ijt',newX,p)
+	dims = ['x','y','time']
+	coords = [data[coord] for coord in dims]
+	yhat = xr.DataArray(data=yhat, dims= dims, coords = coords)
+	prediction_name = 'prediction_' + '_'.join(independant)
+	data[prediction_name] = yhat
+	for i in range (len (independant)):
+		param = p[i]
+		variable = independant[i]
+		dims = ['x','y']
+		coords = [data[coord] for coord in dims]
+		data['regr_coef_'+variable] = xr.DataArray(data=param, dims= dims, coords = coords)
+	data['regr_coef_error'] = xr.DataArray(data=p[-1], dims= dims, coords = coords)
+	
+
+	# individual predictions
+	for i in range (len (independant)):
+		param = p[i]
+		variable = independant[i]
+		yhat = np.einsum('ijt,ij->ijt',newX[i],p[i])
+		dims = ['x','y','time']
+		coords = [data[coord] for coord in dims]
+		yhat = xr.DataArray(data=yhat, dims= dims, coords = coords)
+		data['prediction_'+variable] = yhat
+
+	return data

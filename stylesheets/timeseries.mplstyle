@@ -1,0 +1,17 @@
+text.usetex : True
+font.size : 12
+figure.figsize : 5.5, 2
+figure.titleweight : bold
+savefig.bbox : tight
+
+font.family : computer modern
+
+font.serif : Computer Modern Roman
+font.sans-serif : Computer Modern Sans Serif
+font.monospace : Computer Modern Typewriter
+
+
+xtick.bottom : True
+ytick.left : True
+
+axes.prop_cycle : cycler('color', ['1EA0AE', 'BF160D', 'C69306', '3D9537', '5F1DAF', '666666', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])

@@ -1,0 +1,19 @@
+figure.constrained_layout.use : True
+text.usetex : True
+font.size : 12
+figure.figsize : 5.5, 2.5
+figure.titleweight : bold
+#savefig.bbox : tight
+
+font.family : computer modern
+
+font.serif : Computer Modern Roman
+font.sans-serif : Computer Modern Sans Serif
+font.monospace : Computer Modern Typewriter
+
+axes.prop_cycle : cycler('color', ['177E89', 'EA1B10', '2ca02c', 'd62728', '9467bd', '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])
+
+xtick.bottom : False
+ytick.left : False
+
+hatch.linewidth : 0.1

@@ -2,6 +2,8 @@
 *.grib*
 *.nc*
 data/
+processed_data/
+images/
 *.bin*
 
 # Byte-compiled / optimized / DLL files

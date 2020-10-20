@@ -132,6 +132,11 @@ def process_variables():
 		print(f'{variable} processed')
 
 
+def sort_axes(data):
+	for dim in data.dims:
+		data = data.sortby(dim)
+	return data
+
 def find_anomalies(data):
 	"""Finds the monthly anomaly in any data"""
 	climatology = data.groupby("time.month").mean("time")
@@ -153,6 +158,7 @@ def normalise_indepenant(data, dependant=None):
 	mean_vec = subdata.mean(dim='time')
 	std_vec = subdata.std(dim='time')
 	subdata =  (subdata-mean_vec)/std_vec
+	subdata = subdata.fillna(0)
 	for ind in independent:
 		data[ind] = subdata[ind]
 	return data
@@ -591,5 +597,33 @@ def multiple_fast_regression(data, dependant, independant):
 		coords = [data[coord] for coord in dims]
 		yhat = xr.DataArray(data=yhat, dims= dims, coords = coords)
 		data['prediction_'+variable] = yhat
+
+	return data
+
+from modules import p2
+
+def load_indicies(indicies_to_load):
+	indicies_data  = p2.load_indicies(indicies_to_load, 'monthly')
+	
+	# temporal anomalies if needed
+	y, x = [10*np.arange(435000,-395000,-2500),
+			10*np.arange(-395000,395000,2500)]
+
+	data = xr.Dataset()
+
+	for index in indicies_to_load:
+		X = indicies_data[index].data
+		X = X.transpose()
+		X = np.repeat(X[np.newaxis, np.newaxis,:], len(x), axis=0)
+		X = np.repeat(X, len(y), axis = 1)
+		dims = ['x','y','time']
+		coords = [x,
+				  y,
+				  indicies_data.time]
+
+		data[index] = xr.DataArray(data   = X, 
+								   dims   = dims, 
+								   coords = coords).transpose(*dims)
+		data[index].attrs["units"] = "stddev"
 
 	return data

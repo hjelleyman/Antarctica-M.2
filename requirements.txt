@@ -1,34 +1,37 @@
-argon2-cffi @ file:///C:/ci/argon2-cffi_1596828585465/work
 async-generator==1.10
 attrs @ file:///tmp/build/80754af9/attrs_1600298409949/work
 backcall==0.2.0
+beautifulsoup4==4.9.3
 bleach @ file:///tmp/build/80754af9/bleach_1600439572647/work
-bokeh @ file:///C:/ci/bokeh_1602773517800/work
+bokeh @ file:///C:/ci/bokeh_1602773513253/work
 brotlipy==0.7.0
-Cartopy @ file:///C:/ci/cartopy_1594325515062/work
+Cartopy @ file:///C:/ci/cartopy_1594325486070/work
+cdsapi==0.3.1
 certifi==2020.6.20
-cffi @ file:///C:/ci/cffi_1600699246375/work
+cffi @ file:///C:/ci/cffi_1600699250966/work
+cftime @ file:///C:/ci/cftime_1595379825624/work
 chardet==3.0.4
 click==7.1.2
 cloudpickle @ file:///tmp/build/80754af9/cloudpickle_1598884132938/work
 colorama==0.4.3
-cryptography @ file:///C:/ci/cryptography_1601046905460/work
+cryptography @ file:///C:/ci/cryptography_1601046913206/work
 cycler==0.10.0
 cytoolz==0.11.0
 dask @ file:///tmp/build/80754af9/dask-core_1602083700509/work
 decorator==4.4.2
 defusedxml==0.6.0
-distributed @ file:///C:/ci/distributed_1602065828555/work
+distributed @ file:///C:/ci/distributed_1602065865185/work
 entrypoints==0.3
 fsspec @ file:///tmp/build/80754af9/fsspec_1602684995936/work
+google==3.0.0
 HeapDict==1.0.1
 idna @ file:///tmp/build/80754af9/idna_1593446292537/work
 importlib-metadata @ file:///tmp/build/80754af9/importlib-metadata_1602276842396/work
-ipykernel @ file:///C:/ci/ipykernel_1596190155316/work/dist/ipykernel-5.3.4-py3-none-any.whl
-ipython @ file:///C:/ci/ipython_1598865816163/work
+ipykernel @ file:///C:/ci/ipykernel_1596208728219/work/dist/ipykernel-5.3.4-py3-none-any.whl
+ipython @ file:///C:/ci/ipython_1598883894321/work
 ipython-genutils==0.2.0
 ipywidgets @ file:///tmp/build/80754af9/ipywidgets_1601490159889/work
-jedi @ file:///C:/ci/jedi_1598353661586/work
+jedi @ file:///C:/ci/jedi_1596472767194/work
 Jinja2==2.11.2
 joblib==0.17.0
 json5==0.9.5
@@ -43,32 +46,33 @@ jupyterlab-server @ file:///tmp/build/80754af9/jupyterlab_server_1594164409481/w
 kiwisolver==1.2.0
 llvmlite==0.34.0
 locket==0.2.0
-MarkupSafe==1.1.1
-matplotlib @ file:///C:/ci/matplotlib-base_1597876438601/work
-mistune==0.8.4
+MarkupSafe @ file:///C:/ci/markupsafe_1594405949945/work
+matplotlib @ file:///C:/ci/matplotlib-base_1597858387645/work
+mistune @ file:///C:/ci/mistune_1594373272338/work
 mkl-fft==1.2.0
 mkl-random==1.1.1
 mkl-service==2.3.0
 msgpack==1.0.0
 nbclient @ file:///tmp/build/80754af9/nbclient_1602783176460/work
-nbconvert @ file:///C:/ci/nbconvert_1601914925608/work
+nbconvert @ file:///C:/ci/nbconvert_1601914921407/work
 nbformat @ file:///tmp/build/80754af9/nbformat_1602783287752/work
 nest-asyncio @ file:///tmp/build/80754af9/nest-asyncio_1601499549014/work
-notebook @ file:///C:/ci/notebook_1601501643625/work
+netCDF4==1.5.3
+notebook==6.0.3
 numba==0.51.2
-numpy @ file:///C:/ci/numpy_and_numpy_base_1596215850360/work
+numpy @ file:///C:/ci/numpy_and_numpy_base_1596233945180/work
 olefile==0.46
 OWSLib @ file:///tmp/build/80754af9/owslib_1594380045445/work
 packaging==20.4
-pandas @ file:///C:/ci/pandas_1602083338010/work
+pandas @ file:///C:/ci/pandas_1602088205210/work
 pandocfilters==1.4.2
 parso==0.7.0
 partd==1.1.0
-pickleshare==0.7.5
-Pillow @ file:///C:/ci/pillow_1602770972588/work
+pickleshare @ file:///C:/ci/pickleshare_1594374056827/work
+Pillow @ file:///C:/ci/pillow_1602782968170/work
 prometheus-client==0.8.0
 prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1602688806899/work
-psutil @ file:///C:/ci/psutil_1598370330503/work
+psutil @ file:///C:/ci/psutil_1598352273540/work
 pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
 pyepsg==0.4.0
 Pygments @ file:///tmp/build/80754af9/pygments_1600458456400/work
@@ -76,9 +80,9 @@ pykdtree==1.3.1
 pyOpenSSL @ file:///tmp/build/80754af9/pyopenssl_1594392929924/work
 pyparsing==2.4.7
 pyproj==2.6.1.post1
-pyrsistent @ file:///C:/ci/pyrsistent_1600141795814/work
+pyrsistent @ file:///C:/ci/pyrsistent_1600123688363/work
 pyshp @ file:///tmp/build/80754af9/pyshp_1600141782871/work
-PySocks==1.7.1
+PySocks @ file:///C:/ci/pysocks_1594394709107/work
 python-dateutil==2.8.1
 pytz==2020.1
 pywin32==227
@@ -89,20 +93,21 @@ qtconsole @ file:///tmp/build/80754af9/qtconsole_1600870028330/work
 QtPy==1.9.0
 requests @ file:///tmp/build/80754af9/requests_1592841827918/work
 scikit-learn==0.23.2
-scipy @ file:///C:/ci/scipy_1592916963468/work
+scipy @ file:///C:/ci/scipy_1597686737426/work
 Send2Trash==1.5.0
 Shapely==1.7.1
-sip==4.19.13
 six==1.15.0
 sklearn==0.0
 sortedcontainers==2.2.2
+soupsieve==2.0.1
 tblib @ file:///tmp/build/80754af9/tblib_1597928476713/work
+tensorflow-gpu==2.3.1
 terminado==0.9.1
 testpath==0.4.4
 threadpoolctl==2.1.0
 toolz @ file:///tmp/build/80754af9/toolz_1601054250827/work
 tornado==6.0.4
-tqdm @ file:///tmp/build/80754af9/tqdm_1602185206534/work
+tqdm==4.50.2
 traitlets @ file:///tmp/build/80754af9/traitlets_1602787416690/work
 typing-extensions @ file:///tmp/build/80754af9/typing_extensions_1598376058250/work
 urllib3 @ file:///tmp/build/80754af9/urllib3_1597086586889/work

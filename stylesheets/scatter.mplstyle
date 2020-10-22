@@ -1,10 +1,11 @@
 figure.constrained_layout.use : True
-text.usetex : True
+text.usetex : False
 font.size : 12
 figure.figsize : 5.5, 2.5
 figure.titleweight : bold
 #savefig.bbox : tight
 
+savefig.dpi         : 100
 font.family : computer modern
 
 font.serif : Computer Modern Roman

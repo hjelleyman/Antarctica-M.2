@@ -176,7 +176,7 @@ def clean_axis(data, dim='time'):
 
 
 
-def plot_coefficients(regression_results, dependant,independant):
+def plot_coefficients(regression_results, dependant,independant,folder='week5'):
 
 	variables = [f'regr_coef_{ind}' for ind in independant]
 	N = len(variables)
@@ -201,10 +201,10 @@ def plot_coefficients(regression_results, dependant,independant):
 	cbar = fig.colorbar(cm.ScalarMappable(norm=divnorm, cmap='RdBu'), cax=cbar_ax, shrink=0.88)
 	cbar.set_label('Regression Coefficients [$\\frac{\%}{\sigma}$]')
 
-	plt.savefig(f'images/week5/coefficients_{dependant}_'+'_'.join(independant)+'.pdf')
+	plt.savefig(f'images/{folder}/coefficients_{dependant}_'+'_'.join(independant)+'.png')
 
 
-def contribution_to_trends(regression_results, dependant,independant):
+def contribution_to_trends(regression_results, dependant,independant,folder='week5'):
 
 
 	variables = [v for v in regression_results if 'regr' in v]
@@ -249,10 +249,10 @@ def contribution_to_trends(regression_results, dependant,independant):
 	cbar = plt.colorbar(contor, format=ticker.FuncFormatter(fmt_colorbar))
 	cbar.set_label('Trend (\% yr$^{-1}$)')
 	ax.set_title('Residual')
-	plt.savefig(f'images/week5/Trend_Contribution_{dependant}_'+'_'.join(independant)+'.pdf')
+	plt.savefig(f'images/{folder}/Trend_Contribution_{dependant}_'+'_'.join(independant)+'.png')
 	plt.show()
 
-def plot_contribution_timeseries(regression_results, dependant,independant):
+def plot_contribution_timeseries(regression_results, dependant,independant,folder='week5'):
 
 	if dependant == 'seaice':	
 		area = xr.open_dataset('data/area_files/processed_nsidc.nc').area
@@ -290,11 +290,11 @@ def plot_contribution_timeseries(regression_results, dependant,independant):
 	plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.15), ncol = 3, loc = 'upper right')
 	fig.suptitle('Predicted SIE')
 	plt.ylabel('SIE [$km^2$]')
-	plt.savefig(f'images/week5/Timeseries_{dependant}_'+'_'.join(independant)+'.pdf')
+	plt.savefig(f'images/{folder}/Timeseries_{dependant}_'+'_'.join(independant)+'.png')
 	plt.show()
 
 
-def plot_individual_spatial_contributions(regression_results, dependant,independant, proportional = False):
+def plot_individual_spatial_contributions(regression_results, dependant,independant, proportional = False,folder='week5'):
 	variables = [f'prediction_{ind}' for ind in independant]
 
 	N = len(variables)
@@ -305,10 +305,10 @@ def plot_individual_spatial_contributions(regression_results, dependant,independ
 
 	# print(gradient, regression_results[dependant].polyfit(dim='time', deg=1).sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365)
 	fig = plt.figure(figsize=(5*N,5))
-	# max_ = max([gradient[indexname].max() for indexname in gradient])
-	# min_ = min([gradient[indexname].min() for indexname in gradient])
-	max_ = 1
-	min_ = -1
+	max_ = max([gradient[indexname].max() for indexname in gradient])
+	min_ = min([gradient[indexname].min() for indexname in gradient])
+	# max_ = 1
+	# min_ = -1
 	if max_>min_ and max_>0 and min_<0:
 		divnorm = TwoSlopeNorm(vmin=min_, vcenter=0, vmax=max_)
 		levels = np.linspace(min_,max_,15)
@@ -328,26 +328,26 @@ def plot_individual_spatial_contributions(regression_results, dependant,independ
 	# cbar = fig.colorbar(cm.ScalarMappable(norm=divnorm, cmap='RdBu'), cax=cbar_ax, shrink=0.88)
 	# cbar.set_label('Regression Contributions')
 	if proportional:
-		plt.savefig(f'images/week5/individual_contributions_proportional_{dependant}_'+'_'.join(independant)+'.pdf')
+		plt.savefig(f'images/{folder}/individual_contributions_proportional_{dependant}_'+'_'.join(independant)+'.png')
 
 	else:
-		plt.savefig(f'images/week5/individual_contributions_{dependant}_'+'_'.join(independant)+'.pdf')
+		plt.savefig(f'images/{folder}/individual_contributions_{dependant}_'+'_'.join(independant)+'.png')
 
 	plt.show()
 
-def plotting(regression_results, dependant,independant):
+def plotting(regression_results, dependant,independant,folder='week5'):
 
 	v = [vi for vi in regression_results if any([ind in vi for ind in independant])] + [dependant]
 
 	regression_results = regression_results[v].copy()
-	plot_coefficients(regression_results, dependant,independant)
+	plot_coefficients(regression_results, dependant,independant, folder=folder)
 	# prediction = regression_results[mode]['prediction']
-	contribution_to_trends(regression_results, dependant,independant)
+	contribution_to_trends(regression_results, dependant,independant, folder=folder)
 
-	plot_contribution_timeseries(regression_results, dependant,independant)
-	plot_individual_spatial_contributions(regression_results, dependant,independant)
+	plot_contribution_timeseries(regression_results, dependant,independant, folder=folder)
+	plot_individual_spatial_contributions(regression_results, dependant,independant, folder=folder)
 
-def _get_stats(regression_results, dependant, independant):
+def _get_stats(regression_results, dependant, independant,folder='week5'):
 	v = [vi for vi in regression_results if any([ind in vi for ind in independant])] + [dependant]
 
 	regression_results = regression_results[v].copy()
@@ -452,7 +452,7 @@ def fmt_colorbar(x, pos):
 	b = int(b)
 	return r'${} \times 10^{{{}}}$'.format(a, b)
 
-def plot_variable_trends(regression_results, dependant,independant):
+def plot_variable_trends(regression_results, dependant,independant, folder='week5'):
 	"""
 	Plots the spatial distribution of each variable.
 	"""
@@ -479,18 +479,18 @@ def plot_variable_trends(regression_results, dependant,independant):
 		plt.colorbar(contor, format=ticker.FuncFormatter(fmt_colorbar))
 	fig.suptitle(f'Trends of variables')
 
-	plt.savefig(f'images/week5/individual_trends_{dependant}_'+'_'.join(independant)+'.pdf')
+	plt.savefig(f'images/{folder}/individual_trends_{dependant}_'+'_'.join(independant)+'.png')
 
 	plt.show()
 
-def more_plotting(regression_results, dependant,independant):
+def more_plotting(regression_results, dependant,independant, folder='week5'):
 
 	v = [vi for vi in regression_results if any([ind in vi for ind in independant])] + [dependant]
 
 	regression_results = regression_results[v].copy()
-	plot_coefficients(regression_results, dependant,independant)
-	plot_variable_trends(regression_results, dependant,independant)
-	plot_individual_spatial_contributions(regression_results, dependant,independant, proportional = False)
+	plot_coefficients(regression_results, dependant,independant, folder=folder)
+	plot_variable_trends(regression_results, dependant,independant, folder=folder)
+	plot_individual_spatial_contributions(regression_results, dependant,independant, proportional = False, folder=folder)
 
 
 

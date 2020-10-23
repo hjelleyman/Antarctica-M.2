@@ -1,0 +1,11 @@
+To Do list - Masters
+
+1) Fix colorbars
+2) Write up new temperature results.
+3) Refresh what was mentioned last meeting and make a plan from there.
+
+
+
+Misc
+
+Continue trying to fit a NN onto the data.

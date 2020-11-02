@@ -11,3 +11,4 @@ from modules import week2          as w2
 from modules import week3          as w3
 from modules import week4          as w4
 from modules import week5          as w5
+from modules import week7          as w7

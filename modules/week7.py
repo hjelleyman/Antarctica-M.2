@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt      # Making plots and figures
 import matplotlib.dates  as mdates   # Formatting time labels on figures
 import cartopy.crs 	     as ccrs     # Geographic projection for plotting
 import itertools                     # Make loops more efficient.
+import glob                          # Find all the files in a directory.
 
 # -------------- SST WITH ICE --------------
 
@@ -60,9 +61,9 @@ def select_over_ice_and_plot(data,n):
 			ax2 = fig.add_subplot(212, sharex=ax)
 
 			# Formatting the xaxis ticks
-			ax2.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1,6]))
+			ax2.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[6,12]))
 			ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-			ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1,6]))
+			ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[6,12]))
 			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 			ln1 = ax.plot(subdata.time, subdata.sst-273.15, label = 'SST')
 			ln2 = ax.plot(subdata.time, subdata.skt-273.15, label = 'SKT')
@@ -73,10 +74,17 @@ def select_over_ice_and_plot(data,n):
 			ax2.plot([],[]) # is a different temperature to the temperatures
 			ln4 = ax2.plot(subdata.time, subdata.sic/2.5, label = 'SIC')
 			ax2.set_ylabel('SIC [%]')
+
+			# If there is ice I will highlight the area so we can look at what temperature is doing.
+			ax.fill_between(subdata.time, 0, 1, where=subdata.sic > 0,
+                color='black', alpha=0.2, transform=ax.get_xaxis_transform(),step='pre')
+			ax2.fill_between(subdata.time, 0, 1, where=subdata.sic > 0,
+                color='black', alpha=0.2, transform=ax2.get_xaxis_transform(), step='pre')
+
 			lines = ln1 + ln2 + ln3 + ln4
 			labels = [line.get_label() for line in lines]
 			fig.suptitle(f'Location number {i}')
-			plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.15), ncol = 4, loc = 'upper right')
+			plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.15), ncol = 5, loc = 'upper right')
 			plt.show()
 			plt.close()
 			i+=1
@@ -120,12 +128,22 @@ def generate_sst_statistics(ERA5,ARGO):
 
 # Download Station Data
 def download_station_data():
+	files  = glob.glob('data/stations/*.nc')
+	for file in files:
+		print(xr.open_dataset(file,decode_times=False))
+	# STT = xr.open_mfdataset(files, parallel=True, compat='override', decode_times=False)
 	return None
 
 # Load in datasets
 def load_air_temp_data():
 	T2M = None
 	STT = None
+
+	files  = glob.glob('data/stations/*.nc')
+	STT = xr.Dataset()
+	for file in files:
+		data = xr.open_dataset(file,decode_times=False)
+		STT[data.description] = data.tavg
 	return T2M, STT
 
 # Plot timeseries.

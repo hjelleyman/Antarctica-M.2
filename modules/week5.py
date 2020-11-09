@@ -201,7 +201,7 @@ def plot_coefficients(regression_results, dependant,independant,folder='week5'):
 	cbar = fig.colorbar(cm.ScalarMappable(norm=divnorm, cmap='RdBu'), cax=cbar_ax, shrink=0.88)
 	cbar.set_label('Regression Coefficients [$\\frac{\%}{\sigma}$]')
 
-	plt.savefig(f'images/{folder}/coefficients_{dependant}_'+'_'.join(independant)+'.png')
+	plt.savefig(f'images/{folder}/coefficients_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
 
 
 def contribution_to_trends(regression_results, dependant,independant,folder='week5'):
@@ -249,7 +249,7 @@ def contribution_to_trends(regression_results, dependant,independant,folder='wee
 	cbar = plt.colorbar(contor, format=ticker.FuncFormatter(fmt_colorbar))
 	cbar.set_label('Trend (\% yr$^{-1}$)')
 	ax.set_title('Residual')
-	plt.savefig(f'images/{folder}/Trend_Contribution_{dependant}_'+'_'.join(independant)+'.png')
+	plt.savefig(f'images/{folder}/Trend_Contribution_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
 	plt.show()
 
 def plot_contribution_timeseries(regression_results, dependant,independant,folder='week5'):
@@ -290,7 +290,7 @@ def plot_contribution_timeseries(regression_results, dependant,independant,folde
 	plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.15), ncol = 3, loc = 'upper right')
 	fig.suptitle('Predicted SIE')
 	plt.ylabel('SIE [$km^2$]')
-	plt.savefig(f'images/{folder}/Timeseries_{dependant}_'+'_'.join(independant)+'.png')
+	plt.savefig(f'images/{folder}/Timeseries_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
 	plt.show()
 
 
@@ -328,10 +328,10 @@ def plot_individual_spatial_contributions(regression_results, dependant,independ
 	# cbar = fig.colorbar(cm.ScalarMappable(norm=divnorm, cmap='RdBu'), cax=cbar_ax, shrink=0.88)
 	# cbar.set_label('Regression Contributions')
 	if proportional:
-		plt.savefig(f'images/{folder}/individual_contributions_proportional_{dependant}_'+'_'.join(independant)+'.png')
+		plt.savefig(f'images/{folder}/individual_contributions_proportional_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
 
 	else:
-		plt.savefig(f'images/{folder}/individual_contributions_{dependant}_'+'_'.join(independant)+'.png')
+		plt.savefig(f'images/{folder}/individual_contributions_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
 
 	plt.show()
 
@@ -479,7 +479,7 @@ def plot_variable_trends(regression_results, dependant,independant, folder='week
 		plt.colorbar(contor, format=ticker.FuncFormatter(fmt_colorbar))
 	fig.suptitle(f'Trends of variables')
 
-	plt.savefig(f'images/{folder}/individual_trends_{dependant}_'+'_'.join(independant)+'.png')
+	plt.savefig(f'images/{folder}/individual_trends_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
 
 	plt.show()
 

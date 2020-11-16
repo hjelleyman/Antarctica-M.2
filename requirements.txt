@@ -1,0 +1,12 @@
+tqdm
+numba
+pyproj
+xarray
+numpy
+Cartopy
+scipy
+matplotlib
+plotly
+pandas
+jupyter
+jupyterlab

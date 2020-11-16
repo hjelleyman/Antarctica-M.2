@@ -8,6 +8,11 @@ import matplotlib.dates  as mdates   # Formatting time labels on figures
 import cartopy.crs 	     as ccrs     # Geographic projection for plotting
 import itertools                     # Make loops more efficient.
 import glob                          # Find all the files in a directory.
+from pyproj import Proj, transform
+# 	Interactive Plots
+import plotly.express as px
+import plotly.graph_objects as go
+
 
 # -------------- SST WITH ICE --------------
 
@@ -141,14 +146,41 @@ def load_air_temp_data():
 
 	files  = glob.glob('data/stations/*.nc')
 	STT = xr.Dataset()
+	locations = {}
 	for file in files:
 		data = xr.open_dataset(file,decode_times=False)
 		STT[data.description] = data.tavg
-	return T2M, STT
+		locations[data.description] = {}
+		locations[data.description]['longitude'] = np.float(data.longitude.strip().split(' ')[0])
+		locations[data.description]['latitude']  = np.float(data.latitude .strip().split(' ')[0])
+	return T2M, STT, locations
 
 # Plot timeseries.
-def plot_station_timeseries(T2M, STT):
-	return None
+def plot_station_timeseries(T2M, STT, locations):
+	df = STT.to_dataframe()
+	df = df.stack()
+	df = df.reset_index()
+	df.columns = ['Time','Station', 'Temperature']
+	fig = px.line(df, x="Time", y="Temperature", color='Station', title='Station Temperature Data Across Antarctica')
+	fig.show()
+
+	fig_locations, ax_locations  = plt.subplots(figsize=(10,10),subplot_kw=dict(projection=ccrs.SouthPolarStereo()))
+	ax_locations.coastlines()
+	locations_scatter = ax_locations.scatter(x = [locations[station]['longitude'] for station in STT.variables if station !='time'], y = [locations[station]['latitude'] for station in STT.variables if station !='time'], transform=ccrs.PlateCarree())
+	for i, location in enumerate([station for station in STT.variables if station !='time']):
+		x,y = locations_scatter.get_offsets()[i]
+		inProj = Proj(init='epsg:3031')
+		outProj = Proj(init='epsg:4326')
+		x,y = transform(outProj, inProj,x,y)
+		ax_locations.annotate(xy=(x, y),
+							  text=location,
+							  fontsize=10
+							  )
+	x = 10*np.arange(-395000,395000,2500)
+	y = 10*np.arange(435000,-395000,-2500)
+	ax_locations.scatter(*np.meshgrid(x,y),alpha=0)
+	plt.show()
+	return
 
 # Calculate statistics for station temperature.
 def generate_station_statistics(T2M, STT):

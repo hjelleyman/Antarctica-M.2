@@ -184,7 +184,7 @@ def load_data(variables,projection, temporal_resolution,temporal_decomposition,d
 
 	return data
 
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
 def multiple_fast_regression(data, dependant, independant):
 	"""
 	does regression fast

@@ -155,6 +155,7 @@ def load_air_temp_data():
 		locations[data.description]['latitude']  = np.float(data.latitude .strip().split(' ')[0])
 	return T2M, STT, locations
 
+from pyproj import Transformer
 # Plot timeseries.
 def plot_station_timeseries(T2M, STT, locations):
 	df = STT.to_dataframe()
@@ -169,9 +170,12 @@ def plot_station_timeseries(T2M, STT, locations):
 	locations_scatter = ax_locations.scatter(x = [locations[station]['longitude'] for station in STT.variables if station !='time'], y = [locations[station]['latitude'] for station in STT.variables if station !='time'], transform=ccrs.PlateCarree())
 	for i, location in enumerate([station for station in STT.variables if station !='time']):
 		x,y = locations_scatter.get_offsets()[i]
-		inProj = Proj(init='epsg:3031')
-		outProj = Proj(init='epsg:4326')
-		x,y = transform(outProj, inProj,x,y)
+		x = x%360
+		y = y%360
+		transformer = Transformer.from_crs("epsg:4326", "epsg:3031")
+		print(x, y)
+		x,y = transformer.transform(x,y)
+		print(x,y)
 		ax_locations.annotate(xy=(x, y),
 							  text=location,
 							  fontsize=10

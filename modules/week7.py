@@ -90,6 +90,7 @@ def select_over_ice_and_plot(data,n):
 			labels = [line.get_label() for line in lines]
 			fig.suptitle(f'Location number {i}')
 			plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.15), ncol = 5, loc = 'upper right')
+			plt.savefig(f'images/week7/temperature_ice_timeseries_{i}.png', dpi=500)
 			plt.show()
 			plt.close()
 			i+=1
@@ -98,10 +99,11 @@ def select_over_ice_and_plot(data,n):
 	ax = plt.axes(projection = ccrs.SouthPolarStereo())
 	ax.scatter(plotted_x, plotted_y, transform = ccrs.SouthPolarStereo())
 	for i in range(n):
-		ax.annotate(i, (plotted_x[i], plotted_y[i]))
+		ax.annotate(i+1, (plotted_x[i], plotted_y[i]))
 	ax.set_xlim([min(data.x), max(data.x)])
 	ax.set_ylim([min(data.y), max(data.y)])
 	ax.coastlines()
+	plt.savefig(f'images/week7/temperature_ice_scatter.png', dpi=500)
 	plt.show()
 
 # -------------- SST VERIFICATION --------------
@@ -164,6 +166,8 @@ def plot_station_timeseries(T2M, STT, locations):
 	df.columns = ['Time','Station', 'Temperature']
 	fig = px.line(df, x="Time", y="Temperature", color='Station', title='Station Temperature Data Across Antarctica')
 	fig.show()
+
+	df.to_csv('images/week7/station_data.csv')
 
 	fig_locations, ax_locations  = plt.subplots(figsize=(10,10),subplot_kw=dict(projection=ccrs.SouthPolarStereo()))
 	ax_locations.coastlines()

@@ -181,6 +181,10 @@ def plot_6_timeseries(SIC, LIC, temperature):
 				p_t2m = ax.plot(data.time, data.t2m.sum(dim=('x','y')), label = 't2m')
 				p_sst = ax.plot([],[])
 				p_skt = ax.plot(data.time, data.skt.sum(dim=('x','y')), label = 'skt')
+				
+				ax.plot(predicted.time, predicted.t2m, color = p_t2m[0].get_color())
+				ax.plot(predicted.time, predicted.sst, color = p_sst[0].get_color())
+				ax.plot(predicted.time, predicted.skt, color = p_skt[0].get_color())
 
 		 # Sea variables
 		elif i==1:
@@ -241,7 +245,7 @@ def plot_2_trends(SIC, LIC, temperature):
 	plot = ax2.contourf(trend.x, trend.y,trend, transform=ccrs.SouthPolarStereo(),cmap = 'RdBu', norm=divnorm)
 	cbar = plt.colorbar(plot,ax=ax2)
 	cbar.ax.set_ylabel('[$^\circ$C yr$^{-1}$]')
-	ax1.set_title('Trends in 2MT over Antarctica')
+	ax2.set_title('Trends in 2MT over Antarctica')
 	ax2.coastlines()
 	misc.savefigures(folder='images/week8',filename='seaice_temperature_trends')
 

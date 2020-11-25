@@ -1,8 +1,9 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-size = os.get_terminal_size()
 import xarray as xr
+
+from plyer import notification
 
 def print_heading(heading):
     """Summary
@@ -12,6 +13,8 @@ def print_heading(heading):
     heading : TYPE
         Description
     """
+    
+    size = os.get_terminal_size()
     sidespace = size[0]//4
     if len(heading)%2==1:
         heading = ' '+heading
@@ -28,3 +31,20 @@ def seaice_area_mean(seaice,n):
     adjusted_sic = seaice*area
 
     return adjusted_sic.sum(dim = ('x','y'))
+
+
+def notify(message):
+    notification.notify(
+        title='Penguin Code',
+        message=message,
+        app_icon=None,  # e.g. 'C:\\icon_32x32.ico'
+        timeout=10,  # seconds
+        )
+
+def savefigures(folder=None,filename=None):
+    if not os.path.isdir(f'{folder}/hres'):
+        os.makedirs(f'{folder}/hres')
+    if not os.path.isdir(f'{folder}/lres'):
+        os.makedirs(f'{folder}/lres')
+    plt.savefig(f'{folder}/hres/{filename}.pdf')
+    plt.savefig(f'{folder}/lres/{filename}.png')

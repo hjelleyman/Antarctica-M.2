@@ -11,7 +11,7 @@ import glob
 
 from pyproj import Proj, transform
 
-from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
+from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm, LogNorm
 
 def load_landmask():
 	files = glob.glob('data/landice2/*.nc')
@@ -35,7 +35,7 @@ def load_landmask():
 
 def load_ice_data():
 	"""Loads in ice data, projected to the polar stereographic grid."""
-	SIC = ci.load_seaice()
+	SIC = ci.load_seaice() * 100/250
 	LIC = ci.load_landice()
 	LIC = LIC.sel(lat=slice(-90,-55))
 	LIC = ci.latlon_to_polarstereo(LIC)
@@ -364,51 +364,66 @@ def plot_6_trends(SIC, LIC, temperature, landmask):
 	# plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.2), ncol = 4, loc = 'upper right')
 
 
-def plot_2_scatter(SIC, LIC, temperature, landmask):
+def plot_2_scatter(SIC, LIC, temperature, landmask, filename = 'distribution_of_temperature_ice'):
 
 	# Normalizing variables by area of grid cells This currently doesn't work
-	area = xr.open_dataset('data/area_files/processed_nsidc.nc').area
-	SIC *= area
-	LIC *= area
-	temperature['sst'] = temperature['sst'] * area / area.sum()
-	temperature['skt'] = temperature['skt'] * area / area.sum()
-	temperature['t2m'] = temperature['t2m'] * area / area.sum()
+	# area = xr.open_dataset('data/area_files/processed_nsidc.nc').area
+	# SIC *= area
+	# LIC *= area
+	# temperature['sst'] = temperature['sst'] * area / area.sum()
+	# temperature['skt'] = temperature['skt'] * area / area.sum()
+	# temperature['t2m'] = temperature['t2m'] * area / area.sum()
 	
 	SIC = SIC.sel(time=slice('2002-01-01','2019-12-31'))
 	LIC = LIC.sel(time=slice('2002-01-01','2019-12-31'))
 	temperature = temperature.sel(time=slice('2002-01-01','2019-12-31'))
 
-	# Getting Trend of different variables
-	predicted = xr.Dataset()
-
 	# Creating figure and setting layout of axes
 	plt.style.use('stylesheets/timeseries.mplstyle')
-	fig, axes = plt.subplots(2,1, figsize=(5,10))
-	fig.tight_layout()
+	fig, axes = plt.subplots(2,1, figsize=(5,8))
 
-
-	rows = ['Land', 'Sea']
-
-	for ax, row in zip(axes, rows):
-	    ax.set_ylabel(row, size = 'large')
+	plt.suptitle('Joint Distribution of Temperature and Ice Extents')
 
 	j = 0
 	for i in range(2):
 		ax = axes[i]
-		ax.axhline(0,color='k', alpha=0.5)
-		ax.axvline(0,color='k', alpha=0.5)
+		# ax.axhline(0,color='k', alpha=0.3)
+		# ax.axvline(0,color='k', alpha=0.3)
 
 		 # Land variables
 		if i==0:
 			data = temperature.where(landmask)
 			if j == 0:
-				ax.scatter(data.t2m.values.flatten(), LIC.values.flatten())
+				x = data.skt.values.flatten()
+				y = LIC.values.flatten()
+				mask = np.isfinite(x) * np.isfinite(y)
+				X = x[mask]
+				Y = y[mask]
+				counts, xedges, yedges = np.histogram2d(X,Y, bins=100)
+				xedges = (xedges[1:] + xedges[:-1]) /2
+				yedges = (yedges[1:] + yedges[:-1]) /2
+				im = ax.contourf(xedges,yedges,counts, norm=LogNorm())
+				ax.set_xlabel(r'Skin Temperature [K]')
+				ax.set_ylabel(r'Land Ice Equivilent Liquid Water Thickness [m]')
 
 		 # Sea variables
 		elif i==1:
 			data = temperature.where(~landmask).where(SIC!=0)
 			if j == 0:
-				ax.scatter(data.t2m.values.flatten(), SIC.values.flatten())
+				x = data.skt.values.flatten()
+				y = SIC.values.flatten()
+				mask = np.isfinite(x) * np.isfinite(y)
+				X = x[mask]
+				Y = y[mask]
+				counts, xedges, yedges = np.histogram2d(X,Y, bins=100)
+				xedges = (xedges[1:] + xedges[:-1]) /2
+				yedges = (yedges[1:] + yedges[:-1]) /2
+				im = ax.contourf(xedges,yedges,counts, norm=LogNorm())
+				ax.set_xlabel(r'Skin Temperature [K]')
+				ax.set_ylabel(r'Sea Ice Concentration [\% area]')
+		plt.colorbar(im, ax=ax)
+	fig.tight_layout()
+	misc.savefigures(folder='images/week8', filename=filename)
 
 	# lines = p_sst + p_skt + p_t2m
 	# labels = [line.get_label() for line in lines]

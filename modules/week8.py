@@ -380,7 +380,7 @@ def plot_2_scatter(SIC, LIC, temperature, landmask, filename = 'distribution_of_
 
 	# Creating figure and setting layout of axes
 	plt.style.use('stylesheets/timeseries.mplstyle')
-	fig, axes = plt.subplots(2,1, figsize=(5,8))
+	fig, axes = plt.subplots(2,1, figsize=(5,8), sharex='col')
 
 	plt.suptitle('Joint Distribution of Temperature and Ice Extents')
 

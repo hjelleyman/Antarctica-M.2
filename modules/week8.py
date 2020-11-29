@@ -188,6 +188,7 @@ def plot_6_timeseries(SIC, LIC, temperature, landmask):
 	for i,j in itertools.product(*[range(n) for n in axes.shape]):
 		ax = axes[i,j]
 		ax.axhline(0,color='k', alpha=0.5)
+		ax.xaxis.set_major_formatter('%Y')
 
 		 # Land variables
 		if i==0:

@@ -714,7 +714,7 @@ def mean_distribution(SIC, LIC, temperature, landmask):
     ax.coastlines()
     ax.set_title('Mean Sea Ice Concentration')
     cbar = plt.colorbar(plot)
-    cbar.set_label(r'Mean Sea Ice Concentration [\%]')
+    cbar.set_label(r'Mean Sea Ice Concentration [%]')
     misc.savefigures(folder='images/week8', filename='mean_sic_distribution')
     plt.show()
 
@@ -1004,9 +1004,48 @@ def correlation_plots(SIC, LIC, temperature, landmask):
                      filename='corr_lic_skt_shortterm_temporal_anmomalous')
     plt.show()
 
-    # Generate statistics
+def regression_plots(SIC, LIC, temperature, landmask):
 
-    # Raw correlations
-    # Pattern correlation of trends
-    # Pattern correlation of mean values
-    # 
+    # Generate timeseries with different lengths
+    SIC_short = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    LIC_short = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    temperature_short = temperature.sel(time=slice('2002-01-01', '2019-12-31')).skt
+    SIC_long = SIC.sel(time=slice('1979-01-01', '2019-12-31'))
+    temperature_long = temperature.sel(time=slice('1979-01-01', '2019-12-31')).skt
+
+    # Put everything into a dataset
+    ds = xr.Dataset()
+    ds['SIC_short'] = SIC_short
+    ds['LIC_short'] = LIC_short
+    ds['temperature_short'] = temperature_short
+    ds['SIC_long'] = SIC_long
+    ds['temperature_long'] = temperature_long
+
+    # Calculate regressions
+    sic_temp_long = w5.multiple_fast_regression(ds, 'SIC_long', ['temperature_long'])
+    sic_temp_short = w5.multiple_fast_regression(ds, 'SIC_short', ['temperature_short'])
+    lic_temp_short = w5.multiple_fast_regression(ds, 'LIC_short', ['temperature_short'])
+
+    # Calculate trends spatially
+    gradient = xr.Dataset()
+    gradient['sic_temp_long']  = sic_temp_long.prediction_temperature_long.polyfit(dim='time', deg=1).copy().sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    gradient['sic_temp_short'] = sic_temp_short.prediction_temperature_short.polyfit(dim='time', deg=1).copy().sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    gradient['lic_temp_short'] = lic_temp_short.prediction_temperature_short.polyfit(dim='time', deg=1).copy().sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    
+    # Plot spatial trends
+    for variable in gradient:
+        data = gradient[variable]
+        fig = plt.figure(figsize=(5, 5))
+        ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+        divnorm = TwoSlopeNorm(vmin=data.min().min(), vcenter=0, vmax=data.max().max())
+        plot = ax.contourf(data.x, data.y, data.transpose(),
+                        crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
+        ax.coastlines()
+        ax.set_title(variable)
+        cbar = plt.colorbar(plot)
+        cbar.set_label(r'Trend in Predicted SKT [$^\circ$C yr$^{-1}$]')
+        misc.savefigures(folder='images/week8',
+                        filename=f'trend_predicted_{variable}')
+        plt.show()
+
+    return gradient

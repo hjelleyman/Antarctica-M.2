@@ -179,7 +179,7 @@ def plot_6_timeseries(SIC, LIC, temperature, landmask):
 
     # Creating figure and setting layout of axes
     plt.style.use('stylesheets/timeseries.mplstyle')
-    fig, axes = plt.subplots(3, 2, figsize=(5, 4), sharex='col')
+    fig, axes = plt.subplots(2, 2, figsize=(5, 3), sharex='col')
     fig.tight_layout()
 
     cols = ['Ice', 'Temperature']
@@ -209,7 +209,16 @@ def plot_6_timeseries(SIC, LIC, temperature, landmask):
                     temperature.time.values.astype(
                         float) + gradient_b['polyfit_coefficients'].values
             if j == 0:
-                ax.plot(LIC.time, LIC.sum(dim=('x', 'y')))
+                gradient = LIC.sum(
+                    dim=('x', 'y')).polyfit(dim='time', deg=1)
+                gradient_m = gradient.sel(degree=1)
+                gradient_b = gradient.sel(degree=0)
+                LIC_predicted = gradient_m['polyfit_coefficients'].values * \
+                    temperature.time.values.astype(
+                        float) + gradient_b['polyfit_coefficients'].values
+
+                p = ax.plot(LIC.time, LIC.sum(dim=('x', 'y')))
+                ax.plot(LIC.time, LIC_predicted, color=p[0].get_color())
             else:
                 ax.plot([], [])
                 p_t2m = ax.plot(data.time, data.t2m.sum(
@@ -235,7 +244,17 @@ def plot_6_timeseries(SIC, LIC, temperature, landmask):
                     temperature.time.values.astype(
                         float) + gradient_b['polyfit_coefficients'].values
             if j == 0:
-                ax.plot(SIC.time, SIC.sum(dim=('x', 'y')))
+                gradient = SIC.sortby('time').sum(
+                    dim=('x', 'y')).polyfit(dim='time', deg=1)
+                gradient_m = gradient.sel(degree=1)
+                gradient_b = gradient.sel(degree=0)
+                SIC_predicted = gradient_m['polyfit_coefficients'].values * \
+                    temperature.time.values.astype(
+                        float) + gradient_b['polyfit_coefficients'].values
+
+                p = ax.plot(SIC.time, SIC.sum(dim=('x', 'y')))
+                ax.plot(SIC.time, SIC_predicted, color=p[0].get_color())
+
             else:
                 ax.plot([], [])
                 p_t2m = ax.plot(data.time, data.t2m.sum(

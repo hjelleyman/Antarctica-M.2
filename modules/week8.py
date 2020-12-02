@@ -472,3 +472,522 @@ def plot_2_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_te
     # plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.2), ncol = 4, loc = 'upper right')
 
     # misc.savefigures(folder='images/week8',filename='six_timeseries')
+
+
+from modules import week5 as w5
+
+def plot_4_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_temperature_ice_both_raw_and_anomalous'):
+
+    SIC = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    LIC = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    temperature = temperature.sel(time=slice('2002-01-01', '2019-12-31'))
+
+    SIC_anomalous = SIC.pipe(w5.find_anomalies)
+    LIC_anomalous = LIC.pipe(w5.find_anomalies)
+    temperature_anomalous = temperature.pipe(w5.find_anomalies)
+    
+    # Creating figure and setting layout of axes
+    plt.style.use('stylesheets/timeseries.mplstyle')
+    fig, axes = plt.subplots(2, 2, figsize=(5, 5), sharex='col', sharey='row')
+
+    plt.suptitle('Joint Distribution of Temperature and Ice Extents')
+
+    for i,j in itertools.product(range(2),range(2)):
+        ax = axes[i,j]
+        # ax.axhline(0,color='k', alpha=0.3)
+        # ax.axvline(0,color='k', alpha=0.3)
+
+        # Land variables
+        if i == 0:
+            if j == 0:
+                data = temperature.where(landmask)
+                x = data.skt.values.flatten()
+                y = LIC.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts, norm=LogNorm(), vmin = 0.1, vmax = 1e4)
+                # ax.set_xlabel(r'Skin Temperature [K]')
+                ax.set_ylabel(r'LIELWT [m]')
+                ax.set_title('Raw data plots')
+
+            if j == 1:
+                data = temperature_anomalous.where(landmask)
+                x = data.skt.values.flatten()
+                y = LIC_anomalous.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=1, vmax=1e4)
+                # ax.set_xlabel(r'Skin Temperature [K]')
+                # ax.set_ylabel(
+                    # r'Land Ice Equivilent Liquid Water Thickness [m]')
+                ax.set_title('Anomalous data plots')
+
+        # Sea variables
+        elif i == 1:
+            if j == 0:
+                data = temperature.where(~landmask).where(SIC != 0)
+                x = data.skt.values.flatten()
+                y = SIC.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=1, vmax=1e4)
+                ax.set_xlabel(r'Skin Temperature [K]')
+                ax.set_ylabel(r'SIC [\% area]')
+
+            if j == 1:
+                data = temperature_anomalous.where(~landmask).where(SIC != 0)
+                x = data.skt.values.flatten()
+                y = SIC_anomalous.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=1, vmax=1e4)
+                ax.set_xlabel(r'Skin Temperature [K]')
+                # ax.set_ylabel(r'Sea Ice Concentration [\% area]')
+    fig.subplots_adjust(right=0.95)
+    cbar_ax = fig.add_axes([0.99, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax, shrink=0.88)
+    # cbar.set_label('Regression Coefficients [$\\frac{\%}{\sigma}$]')
+    fig.tight_layout()
+    misc.savefigures(folder='images/week8', filename=filename)
+
+    # lines = p_sst + p_skt + p_t2m
+    # labels = [line.get_label() for line in lines]
+    # plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.2), ncol = 4, loc = 'upper right')
+
+    # misc.savefigures(folder='images/week8',filename='six_timeseries')
+
+
+def scatter_just_seaice(SIC, temperature, landmask): 
+
+    SIC = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    LIC = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    temperature = temperature.sel(time=slice('2002-01-01', '2019-12-31'))
+
+    SIC_anomalous = SIC.pipe(w5.find_anomalies)
+    LIC_anomalous = LIC.pipe(w5.find_anomalies)
+    temperature_anomalous = temperature.pipe(w5.find_anomalies)
+
+    # Creating figure and setting layout of axes
+    plt.style.use('stylesheets/timeseries.mplstyle')
+    fig, axes = plt.subplots(2, 2, figsize=(5, 5), sharex='col', sharey='row')
+
+    plt.suptitle('Joint Distribution of Temperature and Ice Extents')
+
+    for i, j in itertools.product(range(2), range(2)):
+        ax = axes[i, j]
+        # ax.axhline(0,color='k', alpha=0.3)
+        # ax.axvline(0,color='k', alpha=0.3)
+
+        # Land variables
+        if i == 0:
+            if j == 0:
+                data = temperature.where(landmask)
+                x = data.skt.values.flatten()
+                y = LIC.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=0.1, vmax=1e4)
+                # ax.set_xlabel(r'Skin Temperature [K]')
+                ax.set_ylabel(r'LIELWT [m]')
+                ax.set_title('Raw data plots')
+
+            if j == 1:
+                data = temperature_anomalous.where(landmask)
+                x = data.skt.values.flatten()
+                y = LIC_anomalous.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=1, vmax=1e4)
+                # ax.set_xlabel(r'Skin Temperature [K]')
+                # ax.set_ylabel(
+                # r'Land Ice Equivilent Liquid Water Thickness [m]')
+                ax.set_title('Anomalous data plots')
+
+        # Sea variables
+        elif i == 1:
+            if j == 0:
+                data = temperature.where(~landmask).where(SIC != 0)
+                x = data.skt.values.flatten()
+                y = SIC.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=1, vmax=1e4)
+                ax.set_xlabel(r'Skin Temperature [K]')
+                ax.set_ylabel(r'SIC [\% area]')
+
+            if j == 1:
+                data = temperature_anomalous.where(~landmask).where(SIC != 0)
+                x = data.skt.values.flatten()
+                y = SIC_anomalous.values.flatten()
+                mask = np.isfinite(x) * np.isfinite(y)
+                X = x[mask]
+                Y = y[mask]
+                counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+                xedges = (xedges[1:] + xedges[:-1]) / 2
+                yedges = (yedges[1:] + yedges[:-1]) / 2
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=1, vmax=1e4)
+                ax.set_xlabel(r'Skin Temperature [K]')
+                # ax.set_ylabel(r'Sea Ice Concentration [\% area]')
+    fig.subplots_adjust(right=0.95)
+    cbar_ax = fig.add_axes([0.99, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax, shrink=0.88)
+    # cbar.set_label('Regression Coefficients [$\\frac{\%}{\sigma}$]')
+    fig.tight_layout()
+    misc.savefigures(folder='images/week8', filename=filename)
+
+
+def mean_distribution(SIC, LIC, temperature, landmask):
+    """[summary]
+
+    Args:
+        variable (xarray dataarray): variable for which we want the mean spatial distribution.
+    """
+
+    SIC_mean = SIC.mean(dim='time').copy()
+    SIC_mean = SIC_mean.where(SIC_mean <= 100)
+
+    LIC_mean = LIC.mean(dim='time').copy()
+    LIC_mean = LIC_mean.where(landmask)
+
+    temperature_mean = temperature.mean(dim='time').copy().skt
+    temperature_mean = temperature_mean.where(temperature_mean > 100) - 273.15
+
+
+
+    fig = plt.figure(figsize = (5,5))
+    ax = fig.add_subplot(1,1,1, projection=ccrs.SouthPolarStereo())
+    plot = ax.contourf(SIC_mean.x, SIC_mean.y, SIC_mean, crs=ccrs.SouthPolarStereo(), vmin = 0, vmax = 100, levels = 10)
+    ax.coastlines()
+    ax.set_title('Mean Sea Ice Concentration')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Mean Sea Ice Concentration [\%]')
+    misc.savefigures(folder='images/week8', filename='mean_sic_distribution')
+    plt.show()
+
+    fig = plt.figure(figsize = (5,5))
+    ax = fig.add_subplot(1,1,1, projection=ccrs.SouthPolarStereo())
+    plot = ax.contourf(LIC_mean.x, LIC_mean.y, LIC_mean, levels = 20, crs=ccrs.SouthPolarStereo())
+    ax.coastlines()
+    ax.set_title('Mean Land Ice LWET')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Mean Land Ice LWET [m]')
+    misc.savefigures(folder='images/week8', filename='mean_lic_distribution')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin = temperature_mean.min().min(), vcenter = 0, vmax=temperature_mean.max().max())
+    plot = ax.contourf(temperature_mean.x, temperature_mean.y, temperature_mean,
+                       crs=ccrs.SouthPolarStereo(), cmap = 'RdBu_r', norm = divnorm, levels = 16)
+    ax.coastlines()
+    ax.set_title('Mean Skin Temperature')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Mean Skin Temperature [$^\circ$C]')
+    misc.savefigures(folder='images/week8', filename='mean_skt_distribution')
+    plt.show()
+
+
+def trend_distribution(SIC, LIC, temperature, landmask):
+    """[summary]
+
+    Args:
+        variable (xarray dataarray): variable for which we want the mean spatial distribution.
+    """
+
+    SIC_mean = SIC.polyfit(dim='time', deg=1).copy().sel(
+        degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    SIC_mean = SIC_mean.where(SIC.mean(dim='time') <= 100).where(~landmask)
+
+    LIC_mean = LIC.polyfit(dim='time', deg=1).copy().sel(
+        degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    LIC_mean = LIC_mean.where(landmask)
+
+    temperature_mean = temperature.skt.polyfit(dim='time', deg=1).copy().sel(
+        degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    # temperature_mean = temperature_mean.where(temperature_mean > 100)
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=SIC_mean.min(
+    ).min(), vcenter=0, vmax=SIC_mean.max().max())
+    plot = ax.contourf(SIC_mean.x, SIC_mean.y, SIC_mean,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Trend in Sea Ice Concentration')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Trend in Sea Ice Concentration [\% yr$^{-1}$]')
+    misc.savefigures(folder='images/week8', filename='trend_sic_distribution')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=LIC_mean.min(
+    ).min(), vcenter=0, vmax=LIC_mean.max().max())
+    plot = ax.contourf(LIC_mean.x, LIC_mean.y, LIC_mean,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Trend in Land Ice LWET')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Trend in Land Ice LWET [m yr$^{-1}$]')
+    misc.savefigures(folder='images/week8', filename='trend_lic_distribution')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=temperature_mean.min(
+    ).min(), vcenter=0, vmax=temperature_mean.max().max())
+    plot = ax.contourf(temperature_mean.x, temperature_mean.y, temperature_mean,
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Trend in Skin Temperature')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Trend in Skin Temperature [$^\circ$C yr$^{-1}$]')
+    misc.savefigures(folder='images/week8', filename='trend_skt_distribution')
+    plt.show()
+    
+
+    
+def correlation_plots(SIC, LIC, temperature, landmask):
+    """Plots all the correlation plots. and outputs key statistics.
+
+    Args:
+        SIC ([type]): [description]
+        LIC ([type]): [description]
+        temperature ([type]): [description]
+        landmask ([type]): [description]
+    """
+
+    # Generate timeseries with different lengths
+    SIC_short = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    LIC_short = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    temperature_short = temperature.sel(time=slice('2002-01-01', '2019-12-31')).skt
+
+    SIC_long = SIC.sel(time=slice('1979-01-01', '2019-12-31'))
+    temperature_long = temperature.sel(time=slice('1979-01-01', '2019-12-31')).skt
+
+
+
+    # Plot spatial correlation of variables
+    corr_SIC_temp_long  = xr.corr(SIC_long,  temperature_long, dim='time')
+    corr_SIC_temp_short = xr.corr(SIC_short, temperature_short, dim='time')
+    corr_LIC_temp_short = xr.corr(LIC_short, temperature_short, dim='time')
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.contourf(corr_SIC_temp_short.x, corr_SIC_temp_short.y, corr_SIC_temp_short,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Correlations between SIC and SKT')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Correlations')
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_shortterm_spatial')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.contourf(corr_SIC_temp_long.x, corr_SIC_temp_long.y, corr_SIC_temp_long,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Correlations between SIC and SKT')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Correlations')
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_longterm_spatial')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.contourf(corr_LIC_temp_short.x, corr_LIC_temp_short.y, corr_LIC_temp_short,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Correlations between LIC and SKT')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Correlations')
+    misc.savefigures(folder='images/week8',
+                     filename='corr_lic_skt_shortterm_spatial')
+    plt.show()
+
+    # Plot temporal correlation of variables
+
+    corr_SIC_temp_long = xr.corr(SIC_long,  temperature_long, dim=('x','y'))
+    corr_SIC_temp_short = xr.corr(SIC_short, temperature_short, dim=('x','y'))
+    corr_LIC_temp_short = xr.corr(LIC_short, temperature_short, dim=('x','y'))
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.plot(corr_SIC_temp_long.time, corr_SIC_temp_long,)
+    ax.set_title('Correlations between SIC and SKT')
+    ax.set_ylim([-1,1])
+    ax.axhline(0,color='k',alpha=0.5)
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_longterm_temporal')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.plot(corr_SIC_temp_short.time, corr_SIC_temp_short,)
+    ax.set_title('Correlations between SIC and SKT')
+    ax.set_ylim([-1,1])
+    ax.axhline(0,color='k',alpha=0.5)
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_shortterm_temporal')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.plot(corr_LIC_temp_short.time, corr_LIC_temp_short,)
+    ax.set_title('Correlations between LIC and SKT')
+    ax.set_ylim([-1, 1])
+    ax.axhline(0, color='k', alpha=0.5)
+    misc.savefigures(folder='images/week8',
+                     filename='corr_lic_skt_shortterm_temporal')
+    plt.show()
+
+    # Generate timeseries with different lengths
+    SIC_short = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    LIC_short = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
+    temperature_short = temperature.sel(
+        time=slice('2002-01-01', '2019-12-31')).skt
+
+    SIC_long = SIC.sel(time=slice('1979-01-01', '2019-12-31'))
+    temperature_long = temperature.sel(
+        time=slice('1979-01-01', '2019-12-31')).skt
+
+    # Plot spatial correlation of variables
+    SIC_long_anmomalous = SIC_long.pipe(w5.find_anomalies)
+    SIC_short_anmomalous = SIC_short.pipe(w5.find_anomalies)
+    LIC_short_anmomalous = LIC_short.pipe(w5.find_anomalies)
+    temperature_short_anmomalous = temperature_short.pipe(w5.find_anomalies)
+    temperature_long_anmomalous = temperature_long.pipe(w5.find_anomalies)
+
+    
+    corr_SIC_temp_long = xr.corr(SIC_long_anmomalous,  temperature_long_anmomalous, dim='time')
+    corr_SIC_temp_short = xr.corr(SIC_short_anmomalous, temperature_short_anmomalous, dim='time')
+    corr_LIC_temp_short = xr.corr(LIC_short_anmomalous, temperature_short_anmomalous, dim='time')
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.contourf(corr_SIC_temp_short.x, corr_SIC_temp_short.y, corr_SIC_temp_short,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Correlations between SIC and SKT')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Correlations')
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_shortterm_spatial_anmomalous')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.contourf(corr_SIC_temp_long.x, corr_SIC_temp_long.y, corr_SIC_temp_long,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Correlations between SIC and SKT')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Correlations')
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_longterm_spatial_anmomalous')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.contourf(corr_LIC_temp_short.x, corr_LIC_temp_short.y, corr_LIC_temp_short,
+                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+    ax.coastlines()
+    ax.set_title('Correlations between LIC and SKT')
+    cbar = plt.colorbar(plot)
+    cbar.set_label(r'Correlations')
+    misc.savefigures(folder='images/week8',
+                     filename='corr_lic_skt_shortterm_spatial_anmomalous')
+    plt.show()
+
+    # Plot temporal correlation of variables
+
+    corr_SIC_temp_long = xr.corr(SIC_long_anmomalous,  temperature_long_anmomalous, dim=('x', 'y'))
+    corr_SIC_temp_short = xr.corr(SIC_short_anmomalous, temperature_short_anmomalous, dim=('x', 'y'))
+    corr_LIC_temp_short = xr.corr(LIC_short_anmomalous, temperature_short_anmomalous, dim=('x', 'y'))
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.plot(corr_SIC_temp_long.time, corr_SIC_temp_long,)
+    ax.set_title('Correlations between SIC and SKT')
+    ax.set_ylim([-1, 1])
+    ax.axhline(0, color='k', alpha=0.5)
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_longterm_temporal_anmomalous')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.plot(corr_SIC_temp_short.time, corr_SIC_temp_short,)
+    ax.set_title('Correlations between SIC and SKT')
+    ax.set_ylim([-1, 1])
+    ax.axhline(0, color='k', alpha=0.5)
+    misc.savefigures(folder='images/week8',
+                     filename='corr_sic_skt_shortterm_temporal_anmomalous')
+    plt.show()
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1)
+    divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
+    plot = ax.plot(corr_LIC_temp_short.time, corr_LIC_temp_short,)
+    ax.set_title('Correlations between LIC and SKT')
+    ax.set_ylim([-1, 1])
+    ax.axhline(0, color='k', alpha=0.5)
+    misc.savefigures(folder='images/week8',
+                     filename='corr_lic_skt_shortterm_temporal_anmomalous')
+    plt.show()
+
+    # Generate statistics
+
+    # Raw correlations
+    # Pattern correlation of trends
+    # Pattern correlation of mean values
+    # 

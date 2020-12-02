@@ -140,7 +140,6 @@ def sort_axes(data):
 def find_anomalies(data):
 	"""Finds the monthly anomaly in any data"""
 	climatology = data.groupby("time.month").mean("time")
-	print(climatology)
 	data = data.groupby("time.month") - climatology
 	return data
 

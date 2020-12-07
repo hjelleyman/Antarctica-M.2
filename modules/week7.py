@@ -14,6 +14,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
+from modules import misc
+
+
 # -------------- SST WITH ICE --------------
 
 # Checking SST has data when ice is covering
@@ -66,10 +69,10 @@ def select_over_ice_and_plot(data,n):
 			ax2 = fig.add_subplot(212, sharex=ax)
 
 			# Formatting the xaxis ticks
-			ax2.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[6,12]))
-			ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-			ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[6,12]))
-			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+			ax2.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1]))
+			ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+			ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1]))
+			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 			ln1 = ax.plot(subdata.time, subdata.sst-273.15, label = 'SST')
 			ln2 = ax.plot(subdata.time, subdata.skt-273.15, label = 'SKT')
 			ln3 = ax.plot(subdata.time, subdata.t2m-273.15, label = 'T2M')
@@ -90,7 +93,8 @@ def select_over_ice_and_plot(data,n):
 			labels = [line.get_label() for line in lines]
 			fig.suptitle(f'Location number {i}')
 			plt.legend(lines,labels,bbox_to_anchor=(0.99, -0.15), ncol = 5, loc = 'upper right')
-			plt.savefig(f'images/week7/temperature_ice_timeseries_{i}.png', dpi=500)
+			misc.savefigures(folder='images/week7',
+							filename=f'temperature_ice_timeseries_{i}')
 			plt.show()
 			plt.close()
 			i+=1
@@ -103,7 +107,8 @@ def select_over_ice_and_plot(data,n):
 	ax.set_xlim([min(data.x), max(data.x)])
 	ax.set_ylim([min(data.y), max(data.y)])
 	ax.coastlines()
-	plt.savefig(f'images/week7/temperature_ice_scatter.png', dpi=500)
+	misc.savefigures(folder='images/week7',
+					filename='temperature_ice_scatter')
 	plt.show()
 
 # -------------- SST VERIFICATION --------------

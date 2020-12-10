@@ -1,3 +1,7 @@
+from tqdm import tqdm
+import numba
+from scipy import stats
+from modules import week5 as w5
 from modules import combine_ice as ci
 from modules import misc
 
@@ -12,6 +16,8 @@ import glob
 from pyproj import Proj, transform
 
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm, LogNorm
+
+from sklearn.linear_model import LinearRegression
 
 
 def load_landmask():
@@ -493,8 +499,6 @@ def plot_2_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_te
     # misc.savefigures(folder='images/week8',filename='six_timeseries')
 
 
-from modules import week5 as w5
-
 def plot_4_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_temperature_ice_both_raw_and_anomalous'):
 
     SIC = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
@@ -504,15 +508,15 @@ def plot_4_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_te
     SIC_anomalous = SIC.pipe(w5.find_anomalies)
     LIC_anomalous = LIC.pipe(w5.find_anomalies)
     temperature_anomalous = temperature.pipe(w5.find_anomalies)
-    
+
     # Creating figure and setting layout of axes
     plt.style.use('stylesheets/timeseries.mplstyle')
     fig, axes = plt.subplots(2, 2, figsize=(5, 5), sharex='col', sharey='row')
 
     plt.suptitle('Joint Distribution of Temperature and Ice Extents')
 
-    for i,j in itertools.product(range(2),range(2)):
-        ax = axes[i,j]
+    for i, j in itertools.product(range(2), range(2)):
+        ax = axes[i, j]
         # ax.axhline(0,color='k', alpha=0.3)
         # ax.axvline(0,color='k', alpha=0.3)
 
@@ -528,7 +532,8 @@ def plot_4_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_te
                 counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
                 xedges = (xedges[1:] + xedges[:-1]) / 2
                 yedges = (yedges[1:] + yedges[:-1]) / 2
-                im = ax.contourf(xedges, yedges, counts, norm=LogNorm(), vmin = 0.1, vmax = 1e4)
+                im = ax.contourf(xedges, yedges, counts,
+                                 norm=LogNorm(), vmin=0.1, vmax=1e4)
                 # ax.set_xlabel(r'Skin Temperature [K]')
                 ax.set_ylabel(r'LIELWT [m]')
                 ax.set_title('Raw data plots')
@@ -547,7 +552,7 @@ def plot_4_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_te
                                  norm=LogNorm(), vmin=1, vmax=1e4)
                 # ax.set_xlabel(r'Skin Temperature [K]')
                 # ax.set_ylabel(
-                    # r'Land Ice Equivilent Liquid Water Thickness [m]')
+                # r'Land Ice Equivilent Liquid Water Thickness [m]')
                 ax.set_title('Anomalous data plots')
 
         # Sea variables
@@ -595,7 +600,7 @@ def plot_4_scatter(SIC, LIC, temperature, landmask, filename='distribution_of_te
     # misc.savefigures(folder='images/week8',filename='six_timeseries')
 
 
-def scatter_just_seaice(SIC, temperature, landmask): 
+def scatter_just_seaice(SIC, temperature, landmask):
 
     SIC = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
     LIC = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
@@ -706,11 +711,10 @@ def mean_distribution(SIC, LIC, temperature, landmask):
     temperature_mean = temperature.mean(dim='time').copy().skt
     temperature_mean = temperature_mean.where(temperature_mean > 100) - 273.15
 
-
-
-    fig = plt.figure(figsize = (5,5))
-    ax = fig.add_subplot(1,1,1, projection=ccrs.SouthPolarStereo())
-    plot = ax.contourf(SIC_mean.x, SIC_mean.y, SIC_mean, crs=ccrs.SouthPolarStereo(), vmin = 0, vmax = 100, levels = 10)
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    plot = ax.contourf(SIC_mean.x, SIC_mean.y, SIC_mean,
+                       crs=ccrs.SouthPolarStereo(), vmin=0, vmax=100, levels=10)
     ax.coastlines()
     ax.set_title('Mean Sea Ice Concentration')
     cbar = plt.colorbar(plot)
@@ -718,9 +722,10 @@ def mean_distribution(SIC, LIC, temperature, landmask):
     misc.savefigures(folder='images/week8', filename='mean_sic_distribution')
     plt.show()
 
-    fig = plt.figure(figsize = (5,5))
-    ax = fig.add_subplot(1,1,1, projection=ccrs.SouthPolarStereo())
-    plot = ax.contourf(LIC_mean.x, LIC_mean.y, LIC_mean, levels = 20, crs=ccrs.SouthPolarStereo())
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
+    plot = ax.contourf(LIC_mean.x, LIC_mean.y, LIC_mean,
+                       levels=20, crs=ccrs.SouthPolarStereo())
     ax.coastlines()
     ax.set_title('Mean Land Ice LWET')
     cbar = plt.colorbar(plot)
@@ -730,9 +735,10 @@ def mean_distribution(SIC, LIC, temperature, landmask):
 
     fig = plt.figure(figsize=(5, 5))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
-    divnorm = TwoSlopeNorm(vmin = temperature_mean.min().min(), vcenter = 0, vmax=temperature_mean.max().max())
+    divnorm = TwoSlopeNorm(vmin=temperature_mean.min(
+    ).min(), vcenter=0, vmax=temperature_mean.max().max())
     plot = ax.contourf(temperature_mean.x, temperature_mean.y, temperature_mean,
-                       crs=ccrs.SouthPolarStereo(), cmap = 'RdBu_r', norm = divnorm, levels = 16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Mean Skin Temperature')
     cbar = plt.colorbar(plot)
@@ -765,7 +771,7 @@ def trend_distribution(SIC, LIC, temperature, landmask):
     divnorm = TwoSlopeNorm(vmin=SIC_mean.min(
     ).min(), vcenter=0, vmax=SIC_mean.max().max())
     plot = ax.contourf(SIC_mean.x, SIC_mean.y, SIC_mean,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Trend in Sea Ice Concentration')
     cbar = plt.colorbar(plot)
@@ -778,7 +784,7 @@ def trend_distribution(SIC, LIC, temperature, landmask):
     divnorm = TwoSlopeNorm(vmin=LIC_mean.min(
     ).min(), vcenter=0, vmax=LIC_mean.max().max())
     plot = ax.contourf(LIC_mean.x, LIC_mean.y, LIC_mean,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Trend in Land Ice LWET')
     cbar = plt.colorbar(plot)
@@ -798,9 +804,8 @@ def trend_distribution(SIC, LIC, temperature, landmask):
     cbar.set_label(r'Trend in Skin Temperature [$^\circ$C yr$^{-1}$]')
     misc.savefigures(folder='images/week8', filename='trend_skt_distribution')
     plt.show()
-    
 
-    
+
 def correlation_plots(SIC, LIC, temperature, landmask):
     """Plots all the correlation plots. and outputs key statistics.
 
@@ -814,15 +819,15 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     # Generate timeseries with different lengths
     SIC_short = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
     LIC_short = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
-    temperature_short = temperature.sel(time=slice('2002-01-01', '2019-12-31')).skt
+    temperature_short = temperature.sel(
+        time=slice('2002-01-01', '2019-12-31')).skt
 
     SIC_long = SIC.sel(time=slice('1979-01-01', '2019-12-31'))
-    temperature_long = temperature.sel(time=slice('1979-01-01', '2019-12-31')).skt
-
-
+    temperature_long = temperature.sel(
+        time=slice('1979-01-01', '2019-12-31')).skt
 
     # Plot spatial correlation of variables
-    corr_SIC_temp_long  = xr.corr(SIC_long,  temperature_long, dim='time')
+    corr_SIC_temp_long = xr.corr(SIC_long,  temperature_long, dim='time')
     corr_SIC_temp_short = xr.corr(SIC_short, temperature_short, dim='time')
     corr_LIC_temp_short = xr.corr(LIC_short, temperature_short, dim='time')
 
@@ -830,7 +835,7 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.contourf(corr_SIC_temp_short.x, corr_SIC_temp_short.y, corr_SIC_temp_short,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Correlations between SIC and SKT')
     cbar = plt.colorbar(plot)
@@ -843,7 +848,7 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.contourf(corr_SIC_temp_long.x, corr_SIC_temp_long.y, corr_SIC_temp_long,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Correlations between SIC and SKT')
     cbar = plt.colorbar(plot)
@@ -856,7 +861,7 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.contourf(corr_LIC_temp_short.x, corr_LIC_temp_short.y, corr_LIC_temp_short,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Correlations between LIC and SKT')
     cbar = plt.colorbar(plot)
@@ -867,17 +872,17 @@ def correlation_plots(SIC, LIC, temperature, landmask):
 
     # Plot temporal correlation of variables
 
-    corr_SIC_temp_long = xr.corr(SIC_long,  temperature_long, dim=('x','y'))
-    corr_SIC_temp_short = xr.corr(SIC_short, temperature_short, dim=('x','y'))
-    corr_LIC_temp_short = xr.corr(LIC_short, temperature_short, dim=('x','y'))
+    corr_SIC_temp_long = xr.corr(SIC_long,  temperature_long, dim=('x', 'y'))
+    corr_SIC_temp_short = xr.corr(SIC_short, temperature_short, dim=('x', 'y'))
+    corr_LIC_temp_short = xr.corr(LIC_short, temperature_short, dim=('x', 'y'))
 
     fig = plt.figure(figsize=(5, 5))
     ax = fig.add_subplot(1, 1, 1)
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.plot(corr_SIC_temp_long.time, corr_SIC_temp_long,)
     ax.set_title('Correlations between SIC and SKT')
-    ax.set_ylim([-1,1])
-    ax.axhline(0,color='k',alpha=0.5)
+    ax.set_ylim([-1, 1])
+    ax.axhline(0, color='k', alpha=0.5)
     misc.savefigures(folder='images/week8',
                      filename='corr_sic_skt_longterm_temporal')
     plt.show()
@@ -887,8 +892,8 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.plot(corr_SIC_temp_short.time, corr_SIC_temp_short,)
     ax.set_title('Correlations between SIC and SKT')
-    ax.set_ylim([-1,1])
-    ax.axhline(0,color='k',alpha=0.5)
+    ax.set_ylim([-1, 1])
+    ax.axhline(0, color='k', alpha=0.5)
     misc.savefigures(folder='images/week8',
                      filename='corr_sic_skt_shortterm_temporal')
     plt.show()
@@ -921,16 +926,18 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     temperature_short_anmomalous = temperature_short.pipe(w5.find_anomalies)
     temperature_long_anmomalous = temperature_long.pipe(w5.find_anomalies)
 
-    
-    corr_SIC_temp_long = xr.corr(SIC_long_anmomalous,  temperature_long_anmomalous, dim='time')
-    corr_SIC_temp_short = xr.corr(SIC_short_anmomalous, temperature_short_anmomalous, dim='time')
-    corr_LIC_temp_short = xr.corr(LIC_short_anmomalous, temperature_short_anmomalous, dim='time')
+    corr_SIC_temp_long = xr.corr(
+        SIC_long_anmomalous,  temperature_long_anmomalous, dim='time')
+    corr_SIC_temp_short = xr.corr(
+        SIC_short_anmomalous, temperature_short_anmomalous, dim='time')
+    corr_LIC_temp_short = xr.corr(
+        LIC_short_anmomalous, temperature_short_anmomalous, dim='time')
 
     fig = plt.figure(figsize=(5, 5))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.contourf(corr_SIC_temp_short.x, corr_SIC_temp_short.y, corr_SIC_temp_short,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Correlations between SIC and SKT')
     cbar = plt.colorbar(plot)
@@ -943,7 +950,7 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.contourf(corr_SIC_temp_long.x, corr_SIC_temp_long.y, corr_SIC_temp_long,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Correlations between SIC and SKT')
     cbar = plt.colorbar(plot)
@@ -956,7 +963,7 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
     divnorm = TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
     plot = ax.contourf(corr_LIC_temp_short.x, corr_LIC_temp_short.y, corr_LIC_temp_short,
-                       crs=ccrs.SouthPolarStereo(), cmap='PuOr', norm=divnorm, levels=16)
+                       crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
     ax.coastlines()
     ax.set_title('Correlations between LIC and SKT')
     cbar = plt.colorbar(plot)
@@ -967,9 +974,12 @@ def correlation_plots(SIC, LIC, temperature, landmask):
 
     # Plot temporal correlation of variables
 
-    corr_SIC_temp_long = xr.corr(SIC_long_anmomalous,  temperature_long_anmomalous, dim=('x', 'y'))
-    corr_SIC_temp_short = xr.corr(SIC_short_anmomalous, temperature_short_anmomalous, dim=('x', 'y'))
-    corr_LIC_temp_short = xr.corr(LIC_short_anmomalous, temperature_short_anmomalous, dim=('x', 'y'))
+    corr_SIC_temp_long = xr.corr(
+        SIC_long_anmomalous,  temperature_long_anmomalous, dim=('x', 'y'))
+    corr_SIC_temp_short = xr.corr(
+        SIC_short_anmomalous, temperature_short_anmomalous, dim=('x', 'y'))
+    corr_LIC_temp_short = xr.corr(
+        LIC_short_anmomalous, temperature_short_anmomalous, dim=('x', 'y'))
 
     fig = plt.figure(figsize=(5, 5))
     ax = fig.add_subplot(1, 1, 1)
@@ -1004,48 +1014,90 @@ def correlation_plots(SIC, LIC, temperature, landmask):
                      filename='corr_lic_skt_shortterm_temporal_anmomalous')
     plt.show()
 
-def regression_plots(SIC, LIC, temperature, landmask):
 
-    # Generate timeseries with different lengths
+def regression_plots(regression_results, dependant, independant):
+    """
+    Plots reults for regression analysis.
+        1) Scatter of two variables.
+        2) Spatial Trend.
+        3) Temporal mean.
+        4) Spatial mean.
+
+    """
+
+    # Scatter of two variables
+    ds = xr.Dataset()
+    ds['dependant'] = dependant
+    ds['independant'] = regression_results[f'prediction_skt']
+    ds = ds.transpose("y", "x", "time")
+
+    expected = ds['dependant'].values.flatten()
+    predicted = ds['independant'].values.flatten()
+    
+    plt.style.use('stylesheets/contour.mplstyle')
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.axhline(0, color='k', alpha=0.5)
+    ax.axvline(0, color='k', alpha=0.5)
+    mask = np.isfinite(expected) * np.isfinite(predicted)
+    X = expected[mask]
+    Y = predicted[mask]
+    counts, xedges, yedges = np.histogram2d(X, Y, bins=100)
+    xedges = (xedges[1:] + xedges[:-1]) / 2
+    yedges = (yedges[1:] + yedges[:-1]) / 2
+    im = ax.contourf(xedges, yedges, counts, norm=LogNorm())
+    ax.set_xlabel('Expected values')
+    ax.set_ylabel('Predicted values')
+    # ax.autoscale(False)
+    plt.colorbar(im)
+    plt.show()
+
+    # gradient_expected = regression[f'{dependant}'].polyfit(
+    #     dim='time', deg=1, cov=True).sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
+    # gradient_predicted, = regression[f'prediction_{independant}'].polyfit(
+    #     dim='time', deg=1, cov=True).sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
+
+
+    # max_ = max([gradient_expected.max().max(), gradient_predicted.max().max()])
+    # min_ = min([gradient_expected.min().min(), gradient_predicted.min().min()])
+
+    # divnorm = TwoSlopeNorm(vmin=min_, vcenter=0, vmax=max_)
+    # levels = np.arange(min_, max_, 0.1)
+
+    # fig = plt.figure(figsize=(5, 10))
+
+    # ax = fig.add_subplot(2, 1, 1, projection=ccrs.SouthPolarStereo())
+    # im = ax.contourf(gradient_expected.x, gradient_expected.y, gradient_expected.transpose(
+    # ), levels=levels, norm=divnorm, cmap='RdBu_r')
+    # ax.coastlines()
+    # ax.set_title('Expected Trends')
+    # plt.colorbar(im, ax=ax)
+
+    # ax = fig.add_subplot(2, 1, 2, projection=ccrs.SouthPolarStereo())
+    # im = ax.contourf(gradient_predicted.x, gradient_predicted.y,
+    #                  gradient_predicted.transpose(), levels=levels, norm=divnorm, cmap='RdBu_r')
+    # ax.coastlines()
+    # ax.set_title('Predicted Trends')
+    # plt.colorbar(im, ax=ax)
+    pass
+
+from modules import week9 as w9
+
+def regressions(SIC, LIC, temperature, landmask):
     SIC_short = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
     LIC_short = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
-    temperature_short = temperature.sel(time=slice('2002-01-01', '2019-12-31')).skt
+    temperature_short = temperature.sel(
+        time=slice('2002-01-01', '2019-12-31')).skt
     SIC_long = SIC.sel(time=slice('1979-01-01', '2019-12-31'))
-    temperature_long = temperature.sel(time=slice('1979-01-01', '2019-12-31')).skt
-
-    # Put everything into a dataset
-    ds = xr.Dataset()
-    ds['SIC_short'] = SIC_short
-    ds['LIC_short'] = LIC_short
-    ds['temperature_short'] = temperature_short
-    ds['SIC_long'] = SIC_long
-    ds['temperature_long'] = temperature_long
+    temperature_long = temperature.sel(
+        time=slice('1979-01-01', '2019-12-31')).skt
 
     # Calculate regressions
-    sic_temp_long = w5.multiple_fast_regression(ds, 'SIC_long', ['temperature_long'])
-    sic_temp_short = w5.multiple_fast_regression(ds, 'SIC_short', ['temperature_short'])
-    lic_temp_short = w5.multiple_fast_regression(ds, 'LIC_short', ['temperature_short'])
+    ds = xr.Dataset({'sic':SIC_long, 'skt':temperature_long})
+    sic_temp_long = w5.multiple_fast_regression(ds, 'sic', ['skt'])
+    ds = xr.Dataset({'sic': SIC_short, 'skt': temperature_short})
+    sic_temp_short = w5.multiple_fast_regression(ds, 'sic', ['skt'])
+    ds = xr.Dataset({'sic': LIC_short, 'skt': temperature_short})
+    lic_temp_short = w5.multiple_fast_regression(ds, 'sic', ['skt'])
 
-    # Calculate trends spatially
-    gradient = xr.Dataset()
-    gradient['sic_temp_long']  = sic_temp_long.prediction_temperature_long.polyfit(dim='time', deg=1).copy().sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
-    gradient['sic_temp_short'] = sic_temp_short.prediction_temperature_short.polyfit(dim='time', deg=1).copy().sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
-    gradient['lic_temp_short'] = lic_temp_short.prediction_temperature_short.polyfit(dim='time', deg=1).copy().sel(degree=1).polyfit_coefficients * 1e9*60*60*24*365
-    
-    # Plot spatial trends
-    for variable in gradient:
-        data = gradient[variable]
-        fig = plt.figure(figsize=(5, 5))
-        ax = fig.add_subplot(1, 1, 1, projection=ccrs.SouthPolarStereo())
-        divnorm = TwoSlopeNorm(vmin=data.min().min(), vcenter=0, vmax=data.max().max())
-        plot = ax.contourf(data.x, data.y, data.transpose(),
-                        crs=ccrs.SouthPolarStereo(), cmap='RdBu_r', norm=divnorm, levels=16)
-        ax.coastlines()
-        ax.set_title(variable)
-        cbar = plt.colorbar(plot)
-        cbar.set_label(r'Trend in Predicted SKT [$^\circ$C yr$^{-1}$]')
-        misc.savefigures(folder='images/week8',
-                        filename=f'trend_predicted_{variable}')
-        plt.show()
+    return sic_temp_long, sic_temp_short, lic_temp_short
 
-    return gradient

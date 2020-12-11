@@ -216,7 +216,7 @@ def plot_station_timeseries(T2M, STT, locations):
 def station_scatter(STT, locations):
     # Loading data
     temperature = xr.open_dataarray(
-        'data/ERA5/2m_temperature.nc').sel(latitude=slice(-40, -90)).sel(expver=1).sel(time=slice('1979-01-01', '2019-12-31'))
+        'data/ERA5/skin_temperature.nc').sel(latitude=slice(-40, -90)).sel(expver=1).sel(time=slice('1979-01-01', '2019-12-31'))
     STT = STT.sel(time=slice('1979-01-01', '2019-12-31'))
 
     # Interpolating

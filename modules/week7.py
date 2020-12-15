@@ -255,13 +255,19 @@ def station_scatter(STT, locations):
     V = np.ones([50,2])
     V[:, 1] = np.linspace(min_, max_)
     var = (V.dot(cov.dot(V.transpose())))
-    print(var.shape, V.shape, p.shape)
+
+    plt.title('Reanalysis skin temperature plotted against station data')
+    plt.xlabel('Station measured temperature [K]')
+    plt.ylabel('Reanalysis calculated temperature [K]')
 
     plt.text(min_, max_*0.95, f'Gradient {p[0]:.3f}$\pm${np.sqrt(cov[0,0]):.3f}')
     plt.plot(np.linspace(min_, max_), np.linspace(min_, max_), color='black', label='Diagonal')
     plt.plot(np.linspace(min_, max_), yfit, color='black', linewidth=3, label='Best fit')
     # plt.fill_between(np.linspace(min_, max_), yfit+var, yfit-var)
     plt.legend(bbox_to_anchor=(0.99, -0.15), ncol=3, loc='upper right')
+    
+    misc.savefigures(folder='images/week7',
+                     filename='temperature_station_verification_scatter')
     plt.show()
         
 

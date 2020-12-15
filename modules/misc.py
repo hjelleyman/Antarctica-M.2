@@ -46,5 +46,5 @@ def savefigures(folder=None,filename=None):
         os.makedirs(f'{folder}/hres')
     if not os.path.isdir(f'{folder}/lres'):
         os.makedirs(f'{folder}/lres')
-    plt.savefig(f'{folder}/hres/{filename}.pdf')
-    plt.savefig(f'{folder}/lres/{filename}.png')
+    plt.savefig(f'{folder}/hres/{filename}.pdf', bbox_inches='tight')
+    plt.savefig(f'{folder}/lres/{filename}.png', bbox_inches='tight')

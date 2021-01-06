@@ -37,7 +37,10 @@ def regression(dependant, independant):
 def fast_single_regression(dependant, independant):
 
     print(f'Running regression for {dependant.name} from {independant.name}')
-    slope, intercept, r_value, p_value, std_err = xr.apply_ufunc(stats.linregress, dependant, independant,
+
+    dependant = dependant.sortby('time')
+    independant = independant.sortby('time')
+    slope, intercept, r_value, p_value, std_err = xr.apply_ufunc(stats.linregress, independant, dependant,
                                                                  input_core_dims=[
                                                                      ['time'], ['time']],
                                                                  output_core_dims=[
@@ -51,8 +54,8 @@ def fast_single_regression(dependant, independant):
     out['regression'] = slope
     out['pvalues'] = p_value
     out['correlation'] = r_value
-    out['prediction'] = slope + intercept * \
-        independant.time.astype(float)
+    out['intercept'] = intercept
+    out['prediction'] = intercept + slope * independant
 
     return out
 

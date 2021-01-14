@@ -102,7 +102,8 @@ def process_variables():
 	y = xr.DataArray(y, dims='z')
 
 	files = glob('data/ERA5/*')
-	files = [f for f in files if 'geopotential' not in f]
+	files = [f for f in files if 'cloud' in f]
+	# files = [f for f in files if 'geopotential' not in f]
 	print(files)
 	for file in files:
 		data = xr.open_dataset(file)
@@ -203,8 +204,7 @@ def plot_coefficients(regression_results, dependant,independant,folder='week5'):
 	cbar.set_label('Regression Coefficients [$\\frac{\%}{\sigma}$]')
 
 	# plt.savefig(f'images/{folder}/coefficients_{dependant}_'+'_'.join(independant)+'.pdf', dpi=500)
-	misc.savefigures(folder=f'images/{folder}',
-                     filename=f'coefficients_{dependant}_'+'_'.join(independant))
+	
 
 
 def contribution_to_trends(regression_results, dependant,independant,folder='week5'):

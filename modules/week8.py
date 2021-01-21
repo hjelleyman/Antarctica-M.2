@@ -820,11 +820,11 @@ def correlation_plots(SIC, LIC, temperature, landmask):
     SIC_short = SIC.sel(time=slice('2002-01-01', '2019-12-31'))
     LIC_short = LIC.sel(time=slice('2002-01-01', '2019-12-31'))
     temperature_short = temperature.sel(
-        time=slice('2002-01-01', '2019-12-31')).skt
+        time=slice('2002-01-01', '2019-12-31'))
 
     SIC_long = SIC.sel(time=slice('1979-01-01', '2019-12-31'))
     temperature_long = temperature.sel(
-        time=slice('1979-01-01', '2019-12-31')).skt
+        time=slice('1979-01-01', '2019-12-31'))
 
     # Plot spatial correlation of variables
     corr_SIC_temp_long = xr.corr(SIC_long,  temperature_long, dim='time')

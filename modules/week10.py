@@ -32,7 +32,7 @@ def process_data(dataarray, variable):
     x, y = transform(inProj, outProj, x, y)
     x = x.flatten()
     y = y.flatten()
-    if 'cc' not in variable and 'v' not in variable and 'u' not in variable:
+    if 'cc' not in variable and 'v' not in variable and 'u' not in variable and 'tp' not in variable:
         x[x < 0] = x[x < 0]+360
     x = xr.DataArray(x, dims='z')
     y = xr.DataArray(y, dims='z')

@@ -19,6 +19,7 @@ from modules import week7          as w7
 from modules import week8          as w8
 from modules import week9          as w9
 from modules import week10         as w10
+from modules import y21w4          as y2w4
 
 # When new land ice data was downloaded I made this script to process it.
 from modules import combine_ice    as ci
